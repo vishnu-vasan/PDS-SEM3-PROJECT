@@ -1,19 +1,125 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+#include<string.h>
+
 int wickets, overs;
-typedef struct player
+
+struct player
 {
     int playerno, ind_runs, ind_wickets;
     float average, economy, strike_rate;
-    char player_type[7], player_name[25];
-} player;
+    char *player_type, player_name[20];
+};
+typedef struct player player;
+
 struct score
 {
     int team_score;
     int total_overs;
     int total_wickets;
-    player player;
+    //player player;
 };
+typedef struct score score;
+
+player* createPlayer()
+{
+    player* p=(player *)malloc(sizeof(struct player));
+    p->player_type=(char*)malloc(sizeof(char)*7);
+    p->ind_runs= p->ind_wickets = 0;
+    return p;
+}
+
+struct node
+{
+    char playerName[20];
+    int playerRuns;
+    struct node* next;
+};
+
+struct queue
+{
+    struct node* front;
+    struct node* rear;
+};
+
+typedef struct node node;
+typedef struct queue queue;
+queue* batting_order;
+
+node* createNode(char name[20])
+{
+    node* newNode=(node * )malloc(sizeof(struct node));
+    strcpy(newNode->playerName,name);
+    newNode->next=NULL;
+    return newNode;
+}
+
+void createQueue()
+{
+    batting_order=(queue *)malloc(sizeof(struct queue));
+    batting_order->rear=NULL;
+    batting_order->front=NULL;
+}
+
+int allOut()//isEmpty() func
+{
+    return batting_order->front==NULL;
+}
+
+void enqueueBatsman(char *val)
+{
+    node* newNode=createNode(val);
+    if(allOut())
+        batting_order->front=batting_order->rear=newNode;
+    else
+    {
+        batting_order->rear->next=newNode;
+        batting_order->rear=batting_order->rear->next;
+    }
+}
+
+void dequeueBatsman()
+{
+    node* temp=batting_order->front;
+    batting_order->front=batting_order->front->next;
+    printf("\n%s is OUT!!\n",temp->playerName);
+    free(temp);
+}
+
+void currentBatsman()//peek() func
+{
+    printf("The batsman on strike : %s",batting_order->front->playerName);
+}
+
+void battingLineUp()//display() func of queue
+{
+    if(allOut())
+    {
+        printf("\nALL OUT !!\n");
+        return;
+    }
+    node* curr=batting_order->front;
+    printf("\nThe batting line up :\n");
+    printf("-----------------------\n");
+    while(curr!=batting_order->rear)
+    {
+        printf("%s\n",curr->playerName);
+        curr=curr->next;
+    }
+    printf("%s\n",curr->playerName);
+}
+
+void acceptPlayerDetails(player *p,int num)
+{
+    printf("\nEnter the details of PLAYER %d\n",num);
+    printf("----------------------------------\n");
+    printf("Enter the player's name : ");
+    scanf("%s",&p->player_name);
+    printf("Enter the player's role (batsman/bowler/all rounder) : ");
+    scanf("%s",&p->player_type);
+    printf("\n");
+}
 
 int print_rules()
 {
@@ -43,6 +149,7 @@ int print_rules()
     scanf("%d", &n);
     return n;
 }
+
 void start()
 {
     printf("\nEnter the No of wickets(1-5):");
@@ -60,10 +167,12 @@ void start()
         scanf("%d", &overs);
     }
 }
+
 void toss()
 {
     printf("\nTossss!!\n");
 }
+
 void main()
 {
     int t = print_rules();
@@ -72,6 +181,17 @@ void main()
     start();
     printf("\nNo of Wickets in this Match : %d", wickets);
     printf("\nNo of Overs in this Match : %d\n", overs);
-    printf("\nIts Toss Times!!\n");
+    printf("\nIt's Toss Time!!\n");
     toss();
+    player *players[wickets];
+    createQueue();
+    for(int i=0;i<wickets;i++)
+    {
+        players[i]=createPlayer();
+        acceptPlayerDetails(players[i],i+1);
+        enqueueBatsman(players[i]->player_name);
+    }
+    currentBatsman();
+    printf("\n");
+    battingLineUp();
 }
