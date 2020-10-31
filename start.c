@@ -117,9 +117,9 @@ void acceptPlayerDetails(player *p,int num)
     printf("\nEnter the details of PLAYER %d\n",num);
     printf("----------------------------------\n");
     printf("Enter the player's name : ");
-    scanf("%s",&p->player_name);
+    scanf("%s",p->player_name);
     printf("Enter the player's role (batsman/bowler/all rounder) : ");
-    scanf("%s",&p->player_type);
+    scanf("%s",p->player_type);
     p->playerno=num;
     printf("\n");
 }
@@ -177,10 +177,76 @@ void printRandoms(int lower, int upper)
         printf("%d ", num);
 }
 
+void choose()
+{
+    int a;
+    printf("Enter 0 to bat and 1 to bowl: ");
+    scanf("%d",&a);
+    if(a==0)
+    {
+        printf("You have decided to bat first\n");
+    }
+    else
+    {
+        printf("You have decided to bowl first\n");
+    }
+}
+
+void syschoose()
+{
+    int toss =0;
+    toss = rand() % 2;
+    if(toss==0)
+    {
+        printf("System has decided to bat first\n");
+    }
+    else
+    {
+        printf("System has decided to bowl first\n");
+    }
+}
+
 void toss()
 {
-    printf("\nTossss!!\n");
+    int toss = 0,dec,s=0;
+    int call = 0;
+    srand(time(NULL));
+    toss = (rand() % (7));
+    printf("Enter 0 for even and 1 for odd: ");
+    scanf("%d",&dec);
+    if(dec==0 || dec==1){
+        printf("Enter a number within 0 and 6: ");
+        scanf("%d", &call);
+        if(call>=0 && call<=6)
+        {
+            s=toss+call;
+            if(s%2==dec)
+            {
+                printf("You have won the toss\n");
+                choose();
+            }
+            else{
+                if (dec==1)
+                {
+                    printf("Sum is %d and It's even\n",s);
+                }
+                else
+                {
+                    printf("Sum is %d and It's odd\n",s);
+                }
+                printf("System has won the toss\n");
+                syschoose();
+            }
+        }
+        else{
+        printf("Please enter a number within 0 and 6\n");
+        }
+    }
+    else{
+        printf("Please enter either 0 or 1\n");
+    }
 }
+
 
 void main()
 {
@@ -204,4 +270,3 @@ void main()
     printf("\n");
     battingLineUp();
 }
-
