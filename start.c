@@ -9,7 +9,7 @@ struct player
 {
     int playerno, ind_runs, ind_wickets;
     float average, economy, strike_rate;
-    char *player_type, player_name[20];
+    char player_type[15], player_name[20];
 };
 typedef struct player player;
 
@@ -25,16 +25,14 @@ typedef struct score score;
 player* createPlayer()
 {
     player* p=(player *)malloc(sizeof(struct player));
-    p->player_type=(char*)malloc(sizeof(char)*7);
     p->ind_runs= p->ind_wickets = 0;
     return p;
 }
 
 struct node
 {
-    char playerName[20];
-    int playerRuns;
-    struct node* next;
+    player *data;//data part
+    struct node* next;//Pointer to the next node
 };
 
 struct queue
@@ -47,10 +45,10 @@ typedef struct node node;
 typedef struct queue queue;
 queue* batting_order;
 
-node* createNode(char name[20])
+node* createNode(player *p)
 {
     node* newNode=(node * )malloc(sizeof(struct node));
-    strcpy(newNode->playerName,name);
+    newNode->data=p;
     newNode->next=NULL;
     return newNode;
 }
@@ -67,9 +65,9 @@ int allOut()//isEmpty() func
     return batting_order->front==NULL;
 }
 
-void enqueueBatsman(char *val)
+void enqueueBatsman(player *p)
 {
-    node* newNode=createNode(val);
+    node* newNode=createNode(p);
     if(allOut())
         batting_order->front=batting_order->rear=newNode;
     else
@@ -83,13 +81,14 @@ void dequeueBatsman()
 {
     node* temp=batting_order->front;
     batting_order->front=batting_order->front->next;
-    printf("\n%s is OUT!!\n",temp->playerName);
+    printf("\n%s is OUT!!\n",temp->data->player_name);
+    printf("Runs scored : %d\n",temp->data->ind_runs);
     free(temp);
 }
 
 void currentBatsman()//peek() func
 {
-    printf("The batsman on strike : %s",batting_order->front->playerName);
+    printf("The batsman on strike : %s",batting_order->front->data->player_name);
 }
 
 void battingLineUp()//display() func of queue
@@ -101,13 +100,16 @@ void battingLineUp()//display() func of queue
     }
     node* curr=batting_order->front;
     printf("\nThe batting line up :\n");
-    printf("-----------------------\n");
+    printf("----------------------------\n");
+    printf("PLAYER ID\tBATSMAN NAME\n");
+    printf("----------------------------\n");
     while(curr!=batting_order->rear)
     {
-        printf("%s\n",curr->playerName);
+        printf("%d\t\t%s\t\n",curr->data->playerno,curr->data->player_name);
         curr=curr->next;
     }
-    printf("%s\n",curr->playerName);
+    printf("%d\t\t%s\t\n",curr->data->playerno,curr->data->player_name);
+    printf("----------------------------\n");
 }
 
 void acceptPlayerDetails(player *p,int num)
@@ -118,6 +120,7 @@ void acceptPlayerDetails(player *p,int num)
     scanf("%s",&p->player_name);
     printf("Enter the player's role (batsman/bowler/all rounder) : ");
     scanf("%s",&p->player_type);
+    p->playerno=num;
     printf("\n");
 }
 
@@ -168,6 +171,12 @@ void start()
     }
 }
 
+void printRandoms(int lower, int upper)
+{
+        int num = (rand() %(upper - lower + 1)) + lower;
+        printf("%d ", num);
+}
+
 void toss()
 {
     printf("\nTossss!!\n");
@@ -189,9 +198,10 @@ void main()
     {
         players[i]=createPlayer();
         acceptPlayerDetails(players[i],i+1);
-        enqueueBatsman(players[i]->player_name);
+        enqueueBatsman(players[i]);
     }
     currentBatsman();
     printf("\n");
     battingLineUp();
 }
+
