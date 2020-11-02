@@ -191,7 +191,7 @@ void displayPlayerScore(int wickets,player *p[wickets])
     printf("\n------------------------------------------------\n");
     for(int i=0;i<wickets;i++)
     {
-        printf("%d\t\t%-3s\t\t%d\n",p[i]->playerno,p[i]->player_name,p[i]->ind_runs);
+        printf("%d\t\t%-20s%d\n",p[i]->playerno,p[i]->player_name,p[i]->ind_runs);
     }
      printf("-------------------------------------------------\n\n");
 }
