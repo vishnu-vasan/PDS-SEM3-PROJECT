@@ -3,7 +3,7 @@
 #include <time.h>
 #include <string.h>
 
-int wickets, overs, currover = 0;
+int wickets, overs, currover = 0,total_balls=0;
 
 struct player
 {
@@ -59,6 +59,8 @@ void createQueue()
     batting_order->front = NULL;
 }
 
+void lets_start();
+
 int allOut() //isEmpty() func
 {
     return batting_order->front == NULL;
@@ -76,12 +78,14 @@ void enqueueBatsman(player *p)
     }
 }
 
-void dequeueBatsman()
+void dequeueBatsman(int total_balls)
 {
     node *temp = batting_order->front;
     batting_order->front = batting_order->front->next;
     printf("\n%s is OUT!!\n", temp->data->player_name);
-    printf("Runs scored : %d\n\n", temp->data->ind_runs);
+    printf("Runs scored : %d\n", temp->data->ind_runs);
+    temp->data->strike_rate = ((float)temp->data->ind_runs/total_balls)*100;
+    printf("Strike rate is %.2f\n\n",temp->data->strike_rate);
     free(temp);
 }
 
@@ -166,9 +170,104 @@ int printRandoms(int lower, int upper)
     return num;
 }
 
+int choose()
+{
+    int a;
+    printf("Enter 0 to bat and 1 to bowl: ");
+    scanf("%d",&a);
+    if(a==0)
+    {
+        printf("You have decided to bat first\n");
+        return 1;
+    }
+    else
+    {
+        printf("You have decided to bowl first\n");
+        return 0;
+    }
+}
+
+int syschoose()
+{
+    int toss =0;
+    toss = rand() % 2;
+    if(toss==0)
+    {
+        printf("System has decided to bat first\n");
+        return 1;
+    }
+    else
+    {
+        printf("System has decided to bowl first\n");
+        return 0;
+    }
+}
+
 void toss()
 {
-    printf("\nTossss!!\n");
+    int toss = 0,dec,s=0,x,y;
+    int call = 0;
+    srand(time(NULL));
+    toss = (rand() % (7));
+    printf("\nToss Time!!!\n");
+    printf("Enter 0 for even and 1 for odd: ");
+    scanf("%d",&dec);
+    while (dec>1 || dec<0)
+    {
+        printf("Please enter either 0 for even or 1 for odd: ");
+        scanf("%d",&dec);
+    }
+    if(dec==0 || dec==1){
+        printf("Enter a number within 0 and 6: ");
+        scanf("%d", &call);
+        while (call<0 || call>6)
+        {
+            printf("Please enter a number within 0 and 6: ");
+            scanf("%d", &call);
+        }
+        
+        if(call>=0 && call<=6)
+        {
+            s=toss+call;
+            if(s%2==dec)
+            {
+                if (dec==1)
+                {
+                    printf("Sum is %d and It's odd\n",s);
+                }
+                else
+                {
+                    printf("Sum is %d and It's even\n",s);
+                }
+                printf("You have won the toss\n");
+                x=choose();
+                if(x==1){
+                    lets_start();
+                }
+                else{
+                    printf("You have to bowl");
+                }
+            }
+            else{
+                if (dec==1)
+                {
+                    printf("Sum is %d and It's even\n",s);
+                }
+                else
+                {
+                    printf("Sum is %d and It's odd\n",s);
+                }
+                printf("System has won the toss\n");
+                y=syschoose();
+                if(y==1){
+                    printf("You have to bowl");
+                }
+                else{
+                    lets_start();
+                }
+            }
+        }
+    }
 }
 
 void displayPlayerScore(int wickets, player *p[wickets])
@@ -182,6 +281,11 @@ void displayPlayerScore(int wickets, player *p[wickets])
         printf("%d\t\t%-20s%d\n", p[i]->playerno, p[i]->player_name, p[i]->ind_runs);
     }
     printf("-------------------------------------------------\n\n");
+}
+
+void total_balls_by_each_player()
+{
+    total_balls += 1;
 }
 
 void addBalls()
@@ -220,7 +324,9 @@ void batting()
     printf("Computer generated number : %d\n", computer_random);
     if (n == computer_random)
     {
-        dequeueBatsman();
+        total_balls_by_each_player();
+        dequeueBatsman(total_balls);
+        total_balls = 0;
         addBalls();
         addWicket();
         if (!allOut())
@@ -233,6 +339,7 @@ void batting()
     {
         addScore(computer_random);
         addBalls();
+        total_balls_by_each_player();
         printf("%d added to the Score! Score now is: %d/%d\n\n", computer_random, team.team_score, team.total_wickets);
         if (currover == 0)
             printf("OVER UP!!!\t %d overs finished\n\n", team.total_overs);
@@ -241,6 +348,7 @@ void batting()
     {
         addScore(n);
         addBalls();
+        total_balls_by_each_player();
         printf("%d added to the Score! Score now is: %d/%d\n\n", n, team.team_score, team.total_wickets);
         if (currover == 0)
             printf("OVER UP!!!\t %d overs finished\n\n", team.total_overs);
@@ -248,12 +356,6 @@ void batting()
 }
 void lets_start()
 {
-    start();
-    printf("\nNo of Wickets in this Match : %d", wickets);
-    printf("\nNo of Overs in this Match : %d\n", overs);
-
-    printf("\nIt's Toss Time!!\n");
-    toss();
     player *players[wickets];
     createQueue();
     for (int i = 0; i < wickets; i++)
@@ -302,7 +404,7 @@ void main()
         printf("\033[1;33m");
         printf("\n\n1.Rules of the Game");
         printf("\n2.Start The Game");
-        printf("\nEnter your Choice");
+        printf("\nEnter your Choice: ");
         scanf("%d", &choice);
         printf("\033[0;m");
         switch (choice)
@@ -313,7 +415,8 @@ void main()
             break;
         case 2:
             system("clear");
-            lets_start();
+            start();
+            toss();
             break;
         default:
             printf("\033[1;33m");
